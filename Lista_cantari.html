@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de cântări</title>
+    <style>
+	body, html
+	{
+	    height: 100%;
+            margin: 0;
+	    padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	    color: white;
+            display: flex;
+	    flex-direction: column;
+	    align-items: center;
+	    justify-content: center;
+	    text-align: center;
+	    overflow-x: hidden;
+	}
+	.bg-image 
+	{
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("https://t4.ftcdn.net/jpg/02/87/29/51/360_F_287295152_TWOf8EotxI1j8frrB1B4JsUTCZ4rwEkF.jpg");
+            height: 100vh;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: fixed;
+	    width: 100%;
+	    top: 0;
+	    left: 0;
+	    z-index: -1;
+        }
+	@keyframes fade_in
+	{
+	    from
+	    {
+		opacity: 0;
+		transform translateY(40px);
+	    }
+	    to
+  	    {
+		opacity: 1;
+		transform: translateY(0);
+	    }
+	}
+	h2 
+	{
+	    font-size: clamp(24px, 5vw, 40px);
+	    margin-bottom: 30px;
+	    text-shadow: 2px 2px 4px #000;
+	}
+	p
+	{
+	    font-size: 18px;
+	    max-width: 600px;
+	    line-height: 1.6;
+	}
+	.button, #player-container
+	{
+	    width: 320px;
+	    max-width: 90vw;
+	    box-sizing: border-box;
+	}
+	.button
+	{
+	    margin-top: 100px;
+	    font-weight: bold;
+	    text-decoration: none;
+	    background-color: green;
+	    border-radius: 8px;
+	    color: white;
+	    padding: 30px 0;
+	    text-align: center;
+	    display: inline-block;
+	    font-size: 16px;
+	    cursor: pointer;
+	    border: none;
+	    transition: 0.3;
+	    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+	    opacity: 0;
+	    animation: fade_in 1s ease-out forwards;
+	    margin-bottom: 10px;
+	}
+	.button:hover
+	{
+	    box-shadow:0 8px 16px 0 rgba(0,0,0,0.6);
+	    background-color: #006400;
+	    transform: scale(1.05);
+	    transform: translate(-3px);
+	}
+	#player-container
+	{
+	    display: none;
+	    background: rgba(0,0,0,0.8);
+	    padding: 20px 15px;
+	    border-radius: 8px;
+	    width: 320px;
+	    backdrop-filler: blur(10px);
+	    border: 1px solid rgba(255,255,255,0.2);
+	    animation: fade_in 0.5s ease-out forwards;
+	}
+	.player-controls
+	{
+	    display: flex;
+	    align-items: center;
+	    justify-content: space-between;
+	    gap: 10px;
+	}
+	#play-pause-btn
+	{
+	    background: none;
+	    border: 2px solid white;
+	    border-radius: 50%;
+	    color: white;
+	    font-size: 24px;
+	    width: 40px;
+	    height: 40px;
+	    diplay: flex;
+	    align-items: center;
+	    justify-content: center;
+	    cursor: pointer;
+	    transition: 0.2s;
+	}
+	.progress-container
+	{
+	    flex-grow: 1;
+	    height: 5px;
+	    background: #555;
+	    border-radius: 5px;
+	    position: relative;
+	    cursor: pointer;
+	}
+	#play-pause-btn:hover
+	{
+	    background: white;
+	    color: black;
+	}
+	#progress-bar
+	{
+	    width: 0%;
+	    height: 100%;
+	    background: white;
+	    border-radius: 3px;
+	}
+	#progress-handle
+	{
+	    width: 14px;
+	    height: 14px;
+	    background: white;
+	    border-radius: 50%;	
+	    position: absolute;
+	    top: 50%;
+	    left: 0%;
+	    transform: translate(-50%,-50%);
+	    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+	    cursor: pointer;
+	    z-index: 2;
+	}
+	.progress-container:hover #progress-handle
+	{
+	    transform: translate(-50%,-50%) scale(1.2);
+	}
+	#time-remaining
+	{
+	    font-size: 12px;
+	    min-width: 45px;
+	    font-family: monospace;
+	    text-align: right;
+	}
+	.back-link
+	{
+	    margin-top: 30px;
+	    color: #ddd;
+	    text-decoration: underline;
+	    cursor: pointer;
+	}
+    </style>
+</head>
+<body>
+    <div class="bg-image"></div>
+    <button class="button" onclick="togglePlayer()">Rămâi cu noi</button>
+    <div id="player-container">
+        <div class="player-controls">
+            <button id="play-pause-btn" onclick="toggleAudio()">▶</button>
+            <div class="progress-container" onclick="seek(event)">
+                <div id="progress-bar"></div>
+            </div>
+            <span id="time-remaining">0:00</span>
+        </div>
+    </div>
+    <audio id="myAudio">
+        <source src="https://image2url.com/r2/default/audio/1771256463101-0e25a4bc-fadf-4e73-8965-2cf415880260.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+        const audio = document.getElementById('myAudio');
+        const playerContainer = document.getElementById('player-container');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const timeRemaining = document.getElementById('time-remaining');
+
+        function togglePlayer() {
+            if (playerContainer.style.display === "block") {
+                playerContainer.style.display = "none";
+                audio.pause(); 
+                playPauseBtn.innerHTML = "▶";
+            } else {
+                playerContainer.style.display = "block";
+            }
+        }
+
+        function toggleAudio() {
+            if (audio.paused) {
+                audio.play();
+                playPauseBtn.innerHTML = "⏸";
+            } else {
+                audio.pause();
+                playPauseBtn.innerHTML = "▶";
+            }
+        }
+        audio.addEventListener('timeupdate', () => {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percent + "%";
+
+            let remaining = audio.duration - audio.currentTime;
+            if (isNaN(remaining)) remaining = 0;
+            
+            const mins = Math.floor(remaining / 60);
+            const secs = Math.floor(remaining % 60);
+            timeRemaining.innerHTML = `-${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        });
+        function seek(event) {
+            const container = event.currentTarget;
+            const rect = container.getBoundingClientRect(); // Obține dimensiunile exacte
+            const x = event.clientX - rect.left; // Unde s-a dat click
+            const width = rect.width; // Lățimea totală a barei
+            const percentage = x / width;
+            
+            audio.currentTime = percentage * audio.duration;
+        }
+        audio.onended = () => {
+            playPauseBtn.innerHTML = "▶";
+            progressBar.style.width = "0%";
+            timeRemaining.innerHTML = "0:00";
+        };
+    </script>
+</body>
+</html>
