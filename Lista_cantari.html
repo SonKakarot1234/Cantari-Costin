@@ -7,7 +7,7 @@
     <style>
 	body, html
 	{
-	    height: 100%;
+	    min-height: 100%;
             margin: 0;
 	    padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,23 +15,38 @@
             display: flex;
 	    flex-direction: column;
 	    align-items: center;
-	    justify-content: center;
+	    justify-content: flex-start;
 	    text-align: center;
-	    overflow-x: hidden;
+	    padding: 50px, 0;
+	    -ms-overflow-style: none;
+	    scrollbar-width: none;
+	}
+	body::-webkit-scrollbar
+	{
+	    display: none;
 	}
 	.bg-image 
 	{
-            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url("https://t4.ftcdn.net/jpg/02/87/29/51/360_F_287295152_TWOf8EotxI1j8frrB1B4JsUTCZ4rwEkF.jpg");
-            height: 100vh;
-            background-position: center;
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("https://t4.ftcdn.net/jpg/02/87/29/51/360_F_287295152_TWOf8EotxI1j8frrB1B4JsUTCZ4rwEkF.jpg");
+            height: 100%;
+            background-position: center center;
             background-repeat: no-repeat;
             background-size: cover;
             position: fixed;
-	    width: 100%;
-	    top: 0;
-	    left: 0;
-	    z-index: -1;
+	    	width: 100%;
+	    	top: 0;
+	    	left: 0;
+	    	right: 0;
+	    	bottom: 0;
+	    	z-index: -1;
+	    	transform: translateZ(0);
+	    	-webkit-transform: translateZ(0);
         }
+	body
+	{
+	    background-color: #1a1a1a;
+	    overflow-x: hidden;
+	}
 	@keyframes fade_in
 	{
 	    from
@@ -82,6 +97,7 @@
 	    opacity: 0;
 	    animation: fade_in 1s ease-out forwards;
 	    margin-bottom: 10px;
+	    flex-shrink: 0;
 	}
 	.button:hover
 	{
@@ -94,7 +110,7 @@
 	{
 	    display: none;
 	    background: rgba(0,0,0,0.8);
-	    padding: 20px 15px;
+	    padding: 20px;
 	    border-radius: 8px;
 	    width: 320px;
 	    backdrop-filler: blur(10px);
@@ -144,24 +160,6 @@
 	    background: white;
 	    border-radius: 3px;
 	}
-	#progress-handle
-	{
-	    width: 14px;
-	    height: 14px;
-	    background: white;
-	    border-radius: 50%;	
-	    position: absolute;
-	    top: 50%;
-	    left: 0%;
-	    transform: translate(-50%,-50%);
-	    box-shadow: 0 0 5px rgba(0,0,0,0.5);
-	    cursor: pointer;
-	    z-index: 2;
-	}
-	.progress-container:hover #progress-handle
-	{
-	    transform: translate(-50%,-50%) scale(1.2);
-	}
 	#time-remaining
 	{
 	    font-size: 12px;
@@ -169,18 +167,243 @@
 	    font-family: monospace;
 	    text-align: right;
 	}
-	.back-link
+	.search-wrapper 
 	{
-	    margin-top: 30px;
-	    color: #ddd;
-	    text-decoration: underline;
+    	position: sticky;
+	    top: 20px;
+		z-index: 100;
+        width: 320px;
+	    max-width: 90vw;
+		margin-bottom: 30px;
+	}
+	#search-input 
+	{
+    	width: 100%;
+    	padding: 12px 15px;
+    	border-radius: 25px;
+    	border: 2px solid green;
+    	background: rgba(0, 0, 0, 0.8);
+    	color: white;
+    	font-size: 16px;
+    	outline: none;
+    	backdrop-filter: blur(5px);
+	}
+	#suggestions-box 
+	{
+    	position: absolute;
+    	width: 100%;
+    	background: rgba(30, 30, 30, 0.95);
+    	border-radius: 10px;
+        margin-top: 5px;
+	    max-height: 250px;
+		overflow-y: auto;
+        display: none;
+	    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+	}
+	.suggestion-item 
+	{
+    	padding: 12px;
+        text-align: left;
 	    cursor: pointer;
+		border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: 0.2s;
+	}
+	.suggestion-item:hover 
+	{
+    	background: green;
+	}
+	#suggestions-box::-webkit-scrollbar 
+	{   
+	    display: none; 
+	}
+	#back-to-top
+	{
+	    position: fixed;
+    	bottom: 30px;
+        right: 30px;
+	    width: 50px;
+		height: 50px;
+        background-color: green;
+	    color: white;
+		border: none;
+        border-radius: 50%;
+	    font-size: 24px;    	    
+		font-weight: bold;
+        cursor: pointer;
+	    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+		display: none;
+        z-index: 1000;
+	    transition: transform 0.2s, background-color 0.2s;
+	}
+	#back-to-top:hover
+	{
+	    background-color: #006400;
+    	transform: scale(1.1);
+	}
+	@keyframes fadeInButton 
+	{
+    	from { opacity: 0; transform: translateY(20px); }
+    	to { opacity: 1; transform: translateY(0); }
 	}
     </style>
 </head>
 <body>
     <div class="bg-image"></div>
-    <button class="button" onclick="togglePlayer()">Rămâi cu noi</button>
+    <div class="search-wrapper">
+    	<input type="text" id="search-input" placeholder="Caută o cântare..." autocomplete="off">
+    	<div id="suggestions-box"></div>
+    </div>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771409946092-0d01a103-d882-4b57-99fb-dee0d810ece3.mp3')">Acel ce pururi</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771410026151-5feda810-d871-4ede-a3bd-2d9c254e9a3d.mp3')">Adeseori cărarea mea</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413139110-a3b2d65f-b8ed-48d9-9469-438722546b31.mp3')">Ajută-mi să nu pot</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413235587-517e0fe3-5e06-44ab-a413-f2b4cf7c5a5c.mp3')">Ajută-ne să te iubim</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413304956-919eab7f-bc8e-4d21-9723-7a9847f6227b.mp3')">Am fost în multe locuri</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413369515-f9cdf705-35bd-4dc8-bd5f-1c3a197cc204.mp3')">Am găsit în Domnul</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413431165-7ec62395-9d22-484c-8cc1-8536aadcc18d.mp3')">Am trecut biruitor</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771414568495-95b6ce4b-c80f-4a6c-9720-e2baa76bfc31.mp3')">Azi Isus îți vorbește iar</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771414633755-d854afc2-198c-4ce7-b964-26af23c41dd6.mp3')">Baraba</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415119493-c880aeba-05a0-4dd5-8c06-d01bdc77a645.mp3')">Bine e</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415156628-57275a98-710f-4f59-adf1-e871a88ec8b0.mp3')">Bizuiți-vă</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415192854-e82ffe8c-ff7e-40c4-a95a-76933563943d.mp3')">Brațe tari</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415225766-28c29e6b-e80d-44c7-895d-1d29a5c6de4c.mp3')">Când adesori pe cale</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415265543-2bf721c1-b23e-4faa-af20-80f0a4ca026b.mp3')">Când în grabă</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415310034-d742231f-1204-41cb-a901-0689be902568.mp3')">Cântarea mea</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415339891-b8780a2a-1cea-4239-a650-b0f1eb0a3c5b.mp3')">Cât ai trăit...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415366200-01b54983-696a-4a9a-87e6-a192a5f800d1.mp3')">Ce cânt frumos</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415515328-e27c36d6-40d7-464d-a8a1-aa5ddea0d9dc.mp3')">Ce cruce grea...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415539383-84077cc3-c84b-4c04-a4b9-d80bdbd7118f.mp3')">Ce frumos</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415559829-1989a189-741e-4d52-8241-d718f3c914e0.mp3')">Ce multe ploi</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415581699-1336f328-f723-462a-a2f9-fee5b3369759.mp3')">Ce oare duci...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415601523-713ed033-ff00-479b-a64b-f4110689056e.mp3')">Ce pot să fac...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415622415-9a3df216-62e8-4437-a8d0-e08cacdd8a96.mp3')">Ce tainic</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415645779-199cbb68-89ce-44e5-8d68-19d7a73aec8f.mp3')">Ce-ar fi făptura fără tine</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413503982-42aabdd9-460e-4b7a-a113-eee8db11e15c.mp3')">Cum dorește un creb</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415707670-04ed4372-20c0-482c-8b33-bd4f17bbcebe.mp3')">Cum nu mai lasă</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415725622-a4736552-3aa9-402d-a300-b816789f2dc4.mp3')">Cum să nu te cânt</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415773260-ee2b78ba-4ffb-465e-abc5-ae052d979692.mp3')">Da, eu am</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415792065-89729b08-d487-4633-a74b-5495aa6b9a9c.mp3')">Dacă nu-i acuma vremea</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415835965-820de271-599c-4e9f-85cf-e7ae5f8a359c.mp3')">Dacă voia ta</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415854661-b0b3b24b-b9f5-4709-9275-47a619fe6750.mp3')">Dă-mi bucuria</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415872924-64beab7e-fe81-4de8-b346-d5ea70bc093f.mp3')">De când Îl iubesc</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415896681-3af35915-8ada-42f8-bfb3-f0efed1d178c.mp3')">De ce mai plângi</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415948262-3badb7d6-bfce-4844-9eca-e36f249131ea.mp3')">De ce să tremur...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415968803-a73b149c-690a-4455-b5e6-04e0db868b17.mp3')">De mult Isuse</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415987193-420963a1-8fef-4dfe-85bc-6677dd86c1c2.mp3')">De n-ai avut un fiu</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416049672-b6d86412-7d5e-4c54-933d-232f3437a4cd.mp3')">De n-ai fi Tu</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416082372-5b18c216-c9f3-4864-bea8-cba29d91b6ed.mp3')">De păcate împovărat</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416119435-db6e45db-a1c5-43d8-b2c0-5cbe3e746118.mp3')">De ce-s cuprins de grijuri</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416146147-e448b0ce-2e7a-4921-9cfc-72d99ba4d06e.mp3')">Deschide-mi ochii</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416171274-ea6bca46-7f40-49de-9e22-90b6ad8f01d6.mp3')">Din tine am venit iubire</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416198683-7b984fb9-5ee8-465e-ab89-6021623515ff.mp3')">Din zorii zilei mele</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416226657-db876fa4-6b17-4fde-9295-17a72bf9b565.mp3')">Doamne mai 'nainte</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416266468-63f9c09f-e1bb-4826-a36d-ecf487a92757.mp3')">Doamne, mare Ești</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416288982-c5d1e258-6d08-424d-9809-60502256d2af.mp3')">Drumul mântuirii</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416310316-d72ed4bf-3485-4e0c-97bc-a6b413bce6c4.mp3')">După orice izbăvire - Fane</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416368031-0686e64e-5c58-44bf-b253-994a1c3dd863.mp3')">După orice izbăvire - Costin</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416392965-6493777b-f7e6-48c2-a5e5-d4a002c67ff3.mp3')">E harul Tău</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416415594-ba3c41fd-e6d4-4e00-8303-3c2e311f77ac.mp3')">El m-a ocrotit</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416435583-e1cf2c7d-2cca-44fe-9275-6ddf01a0e147.mp3')">Eu cânt cântări</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416453450-fee60c96-ccde-4b69-a8c6-4e0d1b8930aa.mp3')">Eu n-am să te las</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416468749-afc84da9-abda-4690-a5ae-10abd7df6ecb.mp3')">Eu nu știu</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416500072-ec26a57c-2aa4-40cc-85e6-58d584f9ea1c.mp3')">Eu plec acolo...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416537884-8ccdebae-49f7-4d33-bc5e-85cc65664123.mp3')">Eu sunt Calea</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416568629-4d15520c-21c6-4e96-9395-010378d63bfe.mp3')">Fii larg la inimă</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416628211-b26ff0db-56ce-4519-bc34-db48eb8c9bab.mp3')">Ghețimani</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416653974-77126638-85e6-47d0-a4b7-3cf0856965db.mp3')">Har minunat</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416714133-ec305f8f-cbd6-4541-8f0e-ffb549650113.mp3')">Ia jugul</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416731833-1cbdcef2-fc63-4ed8-a799-b54fa1b83102.mp3')">În amurgul vieții</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416751600-b22df590-ed82-48b0-a290-81146780c39a.mp3')">În cântecul meu</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416751600-b22df590-ed82-48b0-a290-81146780c39a.mp3')">În ceas de grea încercare</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416810418-9ab0c72f-24cb-4d28-bd1d-eb8a88c4ed7f.mp3')">În lume-aceasta</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416832673-57f4b4c0-4819-4e25-939a-e7f6995f8e04.mp3')">Inima ne-înduplecată</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416867859-812355e4-297d-46d9-95b3-2b038ba5ed2a.mp3')">Învață-mă s-ascult</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416972148-51c14b7d-c5b7-41aa-af87-d708f8c18217.mp3')">Isuse culme minunată</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417157446-f005b6a1-dc1b-4962-86fe-4f94deb786bd.mp3')">Isuse, Isuse...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417196842-1ec39268-f723-4d38-b573-744c19249493.mp3')">Iubirea Lui</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417225099-35286f67-b7ac-4cbe-bd0e-12ec7d8878a7.mp3')">Iubirea noastră</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417248850-6b35338a-5920-426d-ae78-4c7faac0a2ee.mp3')">Iubirea Ta</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417265635-fa785117-f2c2-4b4b-b00c-0eae36ab9343.mp3')">La cruce</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417300837-421cedf7-1116-48f7-9ca1-00b3381b89b0.mp3')">La însângerata-ți cruce</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417317572-109aec64-28d5-4e4a-95a6-04b95c4283b0.mp3')">Mai avem puțin</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417335991-6140a79f-e7f9-4752-96c1-e7beb3375267.mp3')">Mai taci și de-astă dată</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417359008-8fa1821f-5b7f-40c3-ae0b-ee4bb2629f32.mp3')">Mă-ncred în El</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417379046-a275b12c-09f1-49f8-bd98-003a15fdd030.mp3')">Mielușel divin</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417397874-3f825482-e5d7-46f2-ac2c-2a1f4045b1bc.mp3')">Minunat Isus</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417414848-f83d2256-b3e2-47c3-babd-70598e162ba4.mp3')">Mulțumesc azi</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417494881-ee9a3f44-a274-4469-88c0-da78a4db7709.mp3')">Niciunul n-a pierit</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417514175-18d76d64-d13d-4893-8194-230bb37bb9a9.mp3')">Noi greșim</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417533185-ff78efa7-b5a9-485b-8ac0-ba57ba6bf1ab.mp3')">Nu ești învins cât tim credința</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417556316-39d3e411-b39a-4d17-a2ed-afed1dbd5c6a.mp3')">Nu mă rog</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417576991-0bad9221-9b4a-410c-80b2-67d38a5db5d9.mp3')">Nu numai să vorbesc de Tine</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417610514-a3666d01-95e9-47a2-b4ba-76fa46efa215.mp3')">Nu poți cuprinde</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417642342-bf3a5eec-bdd8-466b-a5ab-8e3dd597dc35.mp3')">Nu vreau să merg</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417679386-e6648947-04c6-4c10-acac-cb3df76266eb.mp3')">Numai o lună</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417694586-cef5777d-4927-49be-9c22-ab5d6282073d.mp3')">Numai tu Isuse Doamne</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417715140-7fbbe6c7-365a-4510-bd55-484701468dc4.mp3')">O ce bine...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417728347-5995570e-a535-4ca6-84a3-b79bf9c60dbf.mp3')">O crește-mi iubirea</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417748056-ffe9cfd1-6bbd-4fe8-997f-50f2610b38cc.mp3')">O Doamne mare</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417765256-d895b9fc-270e-450d-9eeb-b263a8f2bd00.mp3')">O de nu-L mai iubești</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417797378-7c1dd524-a445-4eb5-b04c-8458c95233d0.mp3')">O, nume sfânt</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417821563-2e7167a8-9208-43e0-acf6-5004a5864b26.mp3')">O, nu-s mai tari</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417839600-3978dc7f-7076-4bdf-a8eb-44e1f6f29d4c.mp3')">Oricât de frumos</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417863529-3f081d57-3c5a-47fe-80c6-9951fe246250.mp3')">Orice-ar veni</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417878495-57c2d668-1455-4bd2-87d4-fd9e4d783ff7.mp3')">Părinte-al suferinței</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417906988-b25d8f2a-c8c9-4316-bcf9-c2f2e12637f4.mp3')">Păstorul meu</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417922260-e1eb5539-4d81-476a-81d7-c85ed3a8f87b.mp3')">Pe piatra aspră</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417943618-19d36d08-51a0-4049-ad2b-03cc3515d994.mp3')">Pe sfânta vieții cărare</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417962977-a2e7d168-4f93-4805-bed4-554362f3f6ac.mp3')">Pe un deal depărtat</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417983414-982bdf3a-f799-400c-8159-693d2ed4b415.mp3')">Pentru Adevăr</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418003523-5b5637f3-9891-4823-8250-d5a5e7c04a8a.mp3')">Pentru că trăiește</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418023641-92816288-1fab-48f6-82ac-d7262334ac66.mp3')">Pentru Tine</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418045361-f93f47e3-bce0-4c70-bb0d-0352af518d30.mp3')">Prieten bun</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418065287-bc1b346b-532c-4402-a9c7-3b58265e1da1.mp3')">Prin ascultarea</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418080736-e15b36d0-e4fa-47c4-a0dc-17654ec48bb6.mp3')">Prin cântec...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418121280-3f978513-bcb0-44c3-b60c-f304eac894c8.mp3')">Printre spini</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418140952-d681763e-bd47-4bfa-b938-dced3b144386.mp3')">Privesc spre crucea ta</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418158374-258c3e8a-9cc6-4e07-a651-1673a3b0238e.mp3')">Psalmistul</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418187269-b666b890-283e-4f68-ac7a-370066003dd8.mp3')">Rămâi cu noi</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418187269-b666b890-283e-4f68-ac7a-370066003dd8.mp3')">Râul suferinței</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418295604-27d88894-172a-454e-a265-93edb517b639.mp3')">Regele vieții</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418317073-82619abe-c1a9-41c5-854a-b04d91123f20.mp3')">Rugăciune</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418335731-a7ad6c29-6331-4584-a3b1-5b6e686b9a71.mp3')">Să ard de sete</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418359168-251f873c-4bd8-425e-9d26-20b0f04ae0b7.mp3')">Să fie cât de neagră</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418380976-880ec192-a0f6-4d89-801c-329994e0649b.mp3')">Să fiu adevăr</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418404815-63716493-0f88-4408-a518-60b1a6b1d886.mp3')">Să fiu cuprins</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418426749-0dcfa443-b460-4a77-b8dc-a6fd7faf2a69.mp3')">Să nu m-abat</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418441164-46915c14-0986-4fd4-a862-05e8ba4ee767.mp3')">Să nu merg</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418466094-a01ba0d1-c089-4762-9330-256a1fae9d07.mp3')">Să nu pot</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418478762-b8917061-ded5-46b7-a36b-0658362bb723.mp3')">Să nu slăbești</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418496325-4ca3fded-4292-46bd-b1e4-b58447332e8d.mp3')">Să-mi sporesc</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418511195-ee488f19-49f4-4269-af04-03e57c709c51.mp3')">Sfânt izvor</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418528216-870fa6fd-3e07-4d72-a20d-b92a9fedd71a.mp3')">Sfânt locaș</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422686646-7a5470b3-5379-402a-96c6-d18f5ccc3ec0.mp3')">Siguranță binecuvântată</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422734079-7d4a3f74-7905-4baf-94ef-a9f99fd78030.mp3')">Spală-mi Doamne</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422780024-4bad2c65-a1b2-4d2d-8fa7-c43a62510305.mp3')">Stânca mântuirii ești</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422823944-654cc174-b1a0-40b2-9c4b-a58dbc48c6e8.mp3')">Statornicia</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422887285-90957909-398e-43c7-bdd9-b9ea910ad9b8.mp3')">Stegari ne-nfrânți</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422918643-039cf7a5-51c3-49ba-96b1-e774e96bebe0.mp3')">Strâmtă-i calea</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422938713-358d6656-0bf2-4973-85da-7ffafddfed7f.mp3')">Sunt în mâna Ta</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422958343-e87abfdd-e2ee-4f8f-8c11-af2c6a80167d.mp3')">Sunt un bulgăr</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422984581-bebfb10f-3876-4616-88f3-e8470e998997.mp3')">Țara Ta Isus</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771422999356-bc110477-b39a-4e23-a908-930dda2899b2.mp3')">Tată iubit</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423021147-07c3e6a6-a226-4b99-bad0-2779ff9a2b6d.mp3')">Te doresc doar...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423043477-daae3e27-0299-4a33-bfb7-2ff1e59adff8.mp3')">Te laud</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423059143-ee8e3066-1d8d-48b3-8c97-a459a03a8fb9.mp3')">Te-nalț Doamne</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423081403-ed069b8a-27d2-42ce-abd8-b9e674e70ce9.mp3')">Tot ce-mi doresc</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423102029-1723d06d-5f2d-4af1-aa46-9e42321d6ffd.mp3')">Trăim o vreme</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423117334-a8f905da-93d1-4030-9e46-4be43b1b7aa7.mp3')">Treziți-vă</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423146246-4d5881e5-38ca-4ad0-9a72-337f698354cb.mp3')">Tu dormi...</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423162036-721767b3-f656-4f4e-aa9c-ccc61378a56d.mp3')">Tu Ești scăparea mea</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423188292-84c9e56a-4a64-4bcc-8c0a-50ae4bacd3c9.mp3')">Tu gemi</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423240717-683fbe2e-dc3a-46f8-857b-0e4eac1b8f40.mp3')">Tu mă iubești</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423261338-14fc2334-a347-4109-b5c2-7d10439318fd.mp3')">Tu n-ai lăsat</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423278412-10658f0a-afbf-4b89-9a28-5c8f3be7e8ee.mp3')">Tu-ai fi putut s-alegi</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423299616-368a78a6-da19-491c-8a77-a03f6e00d91c.mp3')">Veghează</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423313356-b0bf5c83-f1af-4381-9dbd-22c0b7fd2866.mp3')">Veghează-n zori</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423330582-f5f5fc65-e583-4f82-9437-f76d7a14001a.mp3')">Vorbește-mi Doamne</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423346067-50c737f7-00f9-4c35-bf12-a0de6dcdc3ac.mp3')">Vorbește-mi Tu Isuse</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423372167-44ecd999-4ea8-44b9-8305-f98ae914152f.mp3')">Vreau lângă Dumnezeu</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423391574-e82d804c-25fd-47db-8265-3fe90f442efb.mp3')">Zi de zi</button>
     <div id="player-container">
         <div class="player-controls">
             <button id="play-pause-btn" onclick="toggleAudio()">▶</button>
@@ -190,23 +413,45 @@
             <span id="time-remaining">0:00</span>
         </div>
     </div>
-    <audio id="myAudio">
-        <source src="https://image2url.com/r2/default/audio/1771256463101-0e25a4bc-fadf-4e73-8965-2cf415880260.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="myAudio"></audio>
     <script>
         const audio = document.getElementById('myAudio');
         const playerContainer = document.getElementById('player-container');
         const playPauseBtn = document.getElementById('play-pause-btn');
         const progressBar = document.getElementById('progress-bar');
         const timeRemaining = document.getElementById('time-remaining');
+        const searchInput = document.getElementById('search-input');
+        const suggestionsBox = document.getElementById('suggestions-box');
+        const backToTopBtn = document.getElementById('back-to-top');
 
-        function togglePlayer() {
-            if (playerContainer.style.display === "block") {
+        let butonCurent = null; 
+
+        function playSong(butonulApasat, url) {
+            const esteVizibil = playerContainer.style.display === "block";
+            const esteSubAcestButon = playerContainer.previousElementSibling === butonulApasat;
+
+            if (esteVizibil && esteSubAcestButon) {
                 playerContainer.style.display = "none";
-                audio.pause(); 
+                audio.pause();
                 playPauseBtn.innerHTML = "▶";
+                butonCurent = null;
             } else {
+                butonulApasat.after(playerContainer);
                 playerContainer.style.display = "block";
+                butonCurent = butonulApasat; 
+
+                if (audio.getAttribute('src') !== url) {
+                    audio.src = url;
+                    progressBar.style.width = "0%";
+                    timeRemaining.innerHTML = "0:00";
+                }
+                
+                audio.play().then(() => {
+                    playPauseBtn.innerHTML = "⏸";
+                }).catch((e) => {
+                    console.log("Așteaptă...", e);
+                    playPauseBtn.innerHTML = "▶";
+                });
             }
         }
 
@@ -219,31 +464,94 @@
                 playPauseBtn.innerHTML = "▶";
             }
         }
-        audio.addEventListener('timeupdate', () => {
-            const percent = (audio.currentTime / audio.duration) * 100;
-            progressBar.style.width = percent + "%";
 
-            let remaining = audio.duration - audio.currentTime;
-            if (isNaN(remaining)) remaining = 0;
-            
-            const mins = Math.floor(remaining / 60);
-            const secs = Math.floor(remaining % 60);
-            timeRemaining.innerHTML = `-${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.style.width = percent + "%";
+                let remaining = audio.duration - audio.currentTime;
+                if (remaining < 0) remaining = 0;
+                const mins = Math.floor(remaining / 60);
+                const secs = Math.floor(remaining % 60);
+                timeRemaining.innerHTML = `-${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
         });
+
         function seek(event) {
-            const container = event.currentTarget;
-            const rect = container.getBoundingClientRect(); // Obține dimensiunile exacte
-            const x = event.clientX - rect.left; // Unde s-a dat click
-            const width = rect.width; // Lățimea totală a barei
-            const percentage = x / width;
-            
-            audio.currentTime = percentage * audio.duration;
+            if (!audio.duration) return;
+            const rect = event.currentTarget.getBoundingClientRect(); 
+            const x = event.clientX - rect.left; 
+            audio.currentTime = (x / rect.width) * audio.duration;
         }
+
         audio.onended = () => {
-            playPauseBtn.innerHTML = "▶";
-            progressBar.style.width = "0%";
-            timeRemaining.innerHTML = "0:00";
+            if (!butonCurent) return;
+
+            const toateButoanele = Array.from(document.querySelectorAll('.button'));
+            const indexCurent = toateButoanele.indexOf(butonCurent);
+
+            if (indexCurent !== -1 && indexCurent < toateButoanele.length - 1) {
+                const urmatorulButon = toateButoanele[indexCurent + 1];
+                
+                urmatorulButon.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              
+                setTimeout(() => {
+                    urmatorulButon.click(); 
+                }, 800);
+            } else {
+                playPauseBtn.innerHTML = "▶";
+                progressBar.style.width = "0%";
+            }
         };
+
+        if (searchInput && suggestionsBox) {
+            searchInput.addEventListener('input', () => {
+                const text = searchInput.value.toLowerCase().trim();
+                const toateButoanele = document.querySelectorAll('.button');
+                suggestionsBox.innerHTML = '';
+
+                if (text.length > 0) {
+                    let matches = 0;
+                    toateButoanele.forEach(buton => {
+                        if (buton.innerText.toLowerCase().includes(text) && matches < 10) {
+                            const div = document.createElement('div');
+                            div.className = 'suggestion-item';
+                            div.innerText = buton.innerText;
+                            div.onclick = () => {
+                                // Ascunde sugestiile, curăță textul, du-te la buton și apasă-l!
+                                suggestionsBox.style.display = 'none';
+                                searchInput.value = '';
+                                buton.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                setTimeout(() => buton.click(), 400); 
+                            };
+                            suggestionsBox.appendChild(div);
+                            matches++;
+                        }
+                    });
+                    suggestionsBox.style.display = matches > 0 ? 'block' : 'none';
+                } else {
+                    suggestionsBox.style.display = 'none';
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (e.target !== searchInput) suggestionsBox.style.display = 'none';
+            });
+        }
+
+        window.onscroll = function() {
+            if (backToTopBtn) {
+                if (document.documentElement.scrollTop > 300 || document.body.scrollTop > 300) {
+                    backToTopBtn.style.display = "block";
+                } else {
+                    backToTopBtn.style.display = "none";
+                }
+            }
+        };
+
+        function scrollToTop() { 
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
     </script>
 </body>
 </html>
