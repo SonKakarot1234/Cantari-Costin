@@ -379,8 +379,10 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423391574-e82d804c-25fd-47db-8265-3fe90f442efb.mp3')">Zi de zi</button>
     <div id="player-container">
         <div class="player-controls">
+	    <button class="nav-btn" onclick="joacaPrecedenta()">⏮</button>
             <button id="play-pause-btn" onclick="toggleAudio()">▶</button>
-	    	<button id="loop-btn" onclick="toggleLoop()" style="background: none; border: none; cursor: pointer; font-size: 1.2rem;">🔁</button>
+	    <button class="nav-btn" onclick="joacaUrmatoarea()">⏭</button>
+	    <button id="loop-btn" onclick="toggleLoop()" style="background: none; border: none; cursor: pointer; font-size: 1.2rem;">🔁</button>
             <div class="progress-container" onclick="seek(event)">
                 <div id="progress-bar"></div>
             </div>
@@ -395,7 +397,7 @@
         const progressBar = document.getElementById('progress-bar');
         const timeRemaining = document.getElementById('time-remaining');
         const backToTopBtn = document.getElementById('back-to-top');
-		const loopBtn = document.getElementById('loop-btn');
+	const loopBtn = document.getElementById('loop-btn');
 
 	function toggleLoop()
 	{
@@ -470,15 +472,16 @@
 	
 	function toggleAudio() 
 	{
-        if (audio.paused) 
-		{
-            audio.play();
-            playPauseBtn.innerHTML = "⏸";
-        } 
-		else 
+            if (playPauseBtn.innerHTML === "⏸") 
 		{
             audio.pause();
             playPauseBtn.innerHTML = "▶";
+        	} 
+	    else 
+		{
+            audio.play().then(() => {
+                playPauseBtn.innerHTML = "⏸";
+            }).catch(e => console.log(e));
         }
     }
 
@@ -533,7 +536,7 @@
             urmatorulButon.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => {
                 urmatorulButon.click();
-            }, 500);
+            }, 300);
         } 
 	else 
 	{
@@ -554,7 +557,7 @@
             butonulPrecedent.scrollIntoView({ behavior: 'smooth', block: 'center' });
             setTimeout(() => {
                 butonulPrecedent.click();
-            }, 500);
+            }, 300);
         }
     }
 
