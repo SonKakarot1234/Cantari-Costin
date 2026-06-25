@@ -249,7 +249,7 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415601523-713ed033-ff00-479b-a64b-f4110689056e.mp3')">Ce pot să fac...</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415622415-9a3df216-62e8-4437-a8d0-e08cacdd8a96.mp3')">Ce tainic</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415645779-199cbb68-89ce-44e5-8d68-19d7a73aec8f.mp3')">Ce-ar fi făptura fără tine</button>
-    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413503982-42aabdd9-460e-4b7a-a113-eee8db11e15c.mp3')">Cum dorește un creb</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413503982-42aabdd9-460e-4b7a-a113-eee8db11e15c.mp3')">Cum dorește un cerb</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415707670-04ed4372-20c0-482c-8b33-bd4f17bbcebe.mp3')">Cum nu mai lasă</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415725622-a4736552-3aa9-402d-a300-b816789f2dc4.mp3')">Cum să nu te cânt</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415773260-ee2b78ba-4ffb-465e-abc5-ae052d979692.mp3')">Da, eu am</button>
@@ -484,7 +484,7 @@
 
     audio.addEventListener('timeupdate', () => {
         if (audio.duration) 
-		{
+	{
             const percent = (audio.currentTime / audio.duration) * 100;
             progressBar.style.width = percent + "%";
             let remaining = audio.duration - audio.currentTime;
@@ -493,9 +493,25 @@
             const mins = Math.floor(remaining / 60);
             const secs = Math.floor(remaining % 60);
             timeRemaining.innerHTML = `-${mins}:${secs < 10 ? '0' : ''}${secs}`;
-		}
+	    if ('mediaSession' in navigator && 'setPositionState' in navigator.mediaSession)
+	    {
+		navigator.mediaSession.setPositionState({
+                    duration: audio.duration,
+                    playbackRate: audio.playbackRate,
+                    position: audio.currentTime
+                });
+	    }
+	}
     });
 
+    audio.addEventListener('play', () => {
+	if ('mediaSession' in navigator)
+	    navigator.mediaSession.playbackState = "playing";
+    });
+    audio.addEventListener('pause', () => {
+        if ('mediaSession' in navigator) 
+	    navigator.mediaSession.playbackState = "paused";
+    });
     function seek(event) 
 	{
         if (!audio.duration) 
@@ -505,30 +521,65 @@
         audio.currentTime = (x / rect.width) * audio.duration;
     }
 
-    audio.onended = () => {
-        if (!butonCurent) 
-			return;
-
-        const toateButoanele = Array.from(document.querySelectorAll('.button'));
+    function joacaUrmatoarea()
+    {
+	if (!butonCurent)
+	    return;
+	const toateButoanele = Array.from(document.querySelectorAll('.button'));
         const indexCurent = toateButoanele.indexOf(butonCurent);
-
-        if (indexCurent !== -1 && indexCurent < toateButoanele.length - 1) 
-		{
+	if (indexCurent !== -1 && indexCurent < toateButoanele.length - 1) 
+	{
             const urmatorulButon = toateButoanele[indexCurent + 1];
-                
             urmatorulButon.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              
             setTimeout(() => {
-                urmatorulButon.click(); 
-            }, 800);
+                urmatorulButon.click();
+            }, 500);
         } 
-		else 
-		{
+	else 
+	{
             playPauseBtn.innerHTML = "▶";
             progressBar.style.width = "0%";
         }
+    }
+
+    function joacaPrecedenta()
+    {
+	if (!butonCurent) 
+	    return;
+        const toateButoanele = Array.from(document.querySelectorAll('.button'));
+        const indexCurent = toateButoanele.indexOf(butonCurent);
+        if (indexCurent !== -1 && indexCurent > 0) 
+	{
+            const butonulPrecedent = toateButoanele[indexCurent - 1];
+            butonulPrecedent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                butonulPrecedent.click();
+            }, 500);
+        }
+    }
+
+    audio.onended = () => {
+	if (audio.loop)
+	    return;
+	joacaUrmatoarea();
     };
-		
+
+    function updateMediaSession(titlu) {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: titlu,
+                artist: 'Lista de cântări',
+                artwork: [
+                    { src: 'https://t4.ftcdn.net/jpg/02/87/29/51/360_F_287295152_TWOf8EotxI1j8frrB1B4JsUTCZ4rwEkF.jpg', sizes: '512x512', type: 'image/jpeg' }
+                ]
+            });
+            navigator.mediaSession.setActionHandler('play', () => { toggleAudio(); });
+            navigator.mediaSession.setActionHandler('pause', () => { toggleAudio(); });
+            navigator.mediaSession.setActionHandler('previoustrack', () => { joacaPrecedenta(); });
+            navigator.mediaSession.setActionHandler('nexttrack', () => { joacaUrmatoarea(); });
+        }
+    }	
+	
     window.onscroll = function() 
 	{
         if (backToTopBtn) 
