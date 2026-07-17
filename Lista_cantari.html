@@ -2,7 +2,10 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Lista de cântări</title>
     <style>
 	body, html
@@ -193,10 +196,21 @@
 	    background-color: #3B3B3B;
     	    transform: scale(1.1);
 	}
+	#top-controls
+	{
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    gap: 15px;
+	    margin-top: 50px;
+	    margin-bottom: 20px;
+	    width: 100%;
+	    max-width: 90vw;
+	    z-index: 10;
+	    position: relative;
+	}
 	#shuffle-btn 
 	{
-    	    margin-top: 50px;
-    	    margin-bottom: 20px;
     	    padding: 15px 30px;
     	    font-size: 18px;
     	    font-weight: bold;
@@ -207,12 +221,175 @@
     	    cursor: pointer;
     	    transition: 0.3s;
     	    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    	    z-index: 10;
+    	    flex-shrink: 0;
 	}
 	#shuffle-btn:hover 
 	{
     	    background-color: #3B3B3B;
     	    transform: scale(1.05);
+	}
+	#search-wrapper
+	{
+	    position: relative;
+	    flex: 1;
+	    max-width: 320px;
+	}
+	#search-input
+	{
+	    width: 100%;
+	    padding: 15px 20px;
+	    font-size: 16px;
+	    border: none;
+	    border-radius: 50px;
+	    background-color: rgba(0, 0, 0, 0.8);
+	    color: white;
+	    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+	    box-sizing: border-box;
+	    outline: none;
+	}
+	#search-input::placeholder
+	{
+	    color: rgba(255,255,255,0.6);
+	}
+	#search-input:focus
+	{
+	    box-shadow: 0 4px 15px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.3);
+	}
+	#search-results
+	{
+	    display: none;
+	    position: absolute;
+	    top: calc(100% + 8px);
+	    left: 0;
+	    right: 0;
+	    max-height: 300px;
+	    overflow-y: auto;
+	    background: rgba(0, 0, 0, 0.95);
+	    border-radius: 8px;
+	    border: 1px solid rgba(255,255,255,0.2);
+	    backdrop-filter: blur(10px);
+	    z-index: 100;
+	    text-align: left;
+	    -ms-overflow-style: none;
+	    scrollbar-width: none;
+	}
+	#search-results::-webkit-scrollbar
+	{
+	    display: none;
+	}
+	#search-results.visible
+	{
+	    display: block;
+	}
+	.search-result-item
+	{
+	    padding: 12px 16px;
+	    cursor: pointer;
+	    border-bottom: 1px solid rgba(255,255,255,0.1);
+	    transition: background 0.2s;
+	}
+	.search-result-item:last-child
+	{
+	    border-bottom: none;
+	}
+	.search-result-item:hover
+	{
+	    background: rgba(255,255,255,0.1);
+	}
+	#mini-player
+	{
+	    display: none;
+	    position: fixed;
+	    bottom: 0;
+	    left: 0;
+	    right: 0;
+	    background: rgba(0, 0, 0, 0.92);
+	    backdrop-filter: blur(12px);
+	    border-top: 1px solid rgba(255,255,255,0.2);
+	    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+	    z-index: 1001;
+	    box-sizing: border-box;
+	}
+	#mini-player.visible
+	{
+	    display: block;
+	}
+	.mini-player-title
+	{
+	    display: block;
+	    font-size: 14px;
+	    font-weight: bold;
+	    white-space: nowrap;
+	    overflow: hidden;
+	    text-overflow: ellipsis;
+	    margin-bottom: 10px;
+	    text-align: left;
+	}
+	.mini-player-controls
+	{
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    gap: 24px;
+	    margin-bottom: 10px;
+	}
+	.mini-player-controls button
+	{
+	    background: none;
+	    border: none;
+	    color: white;
+	    font-size: 22px;
+	    cursor: pointer;
+	    padding: 4px;
+	    line-height: 1;
+	}
+	#mini-play-pause
+	{
+	    border: 2px solid white;
+	    border-radius: 50%;
+	    width: 44px;
+	    height: 44px;
+	    display: flex;
+	    align-items: center;
+	    justify-content: center;
+	    font-size: 18px;
+	}
+	#mini-loop.active
+	{
+	    color: #4CAF50;
+	    transform: scale(1.15);
+	}
+	.mini-progress-container
+	{
+	    height: 4px;
+	    background: #555;
+	    border-radius: 4px;
+	    cursor: pointer;
+	}
+	#mini-progress-bar
+	{
+	    width: 0%;
+	    height: 100%;
+	    background: white;
+	    border-radius: 4px;
+	}
+	@media (min-width: 769px)
+	{
+	    #mini-player
+	    {
+	        display: none !important;
+	    }
+	}
+	@media (max-width: 768px)
+	{
+	    body.mini-player-active
+	    {
+	        padding-bottom: calc(100px + env(safe-area-inset-bottom));
+	    }
+	    body.mini-player-active #back-to-top
+	    {
+	        bottom: calc(100px + env(safe-area-inset-bottom));
+	    }
 	}
 	@keyframes fadeInButton 
 	{
@@ -223,7 +400,13 @@
 </head>
 <body>
     <div class="bg-image"></div>
-    <button id="shuffle-btn" onclick="shuffleButtons()">🔀</button>
+    <div id="top-controls">
+        <button id="shuffle-btn" onclick="shuffleButtons()">🔀</button>
+        <div id="search-wrapper">
+            <input type="text" id="search-input" placeholder="Caută o cântare..." autocomplete="off" lang="ro">
+            <div id="search-results"></div>
+        </div>
+    </div>
     <button id="back-to-top" onclick="scrollToTop()">↑</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771409946092-0d01a103-d882-4b57-99fb-dee0d810ece3.mp3')">Acel ce pururi</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771410026151-5feda810-d871-4ede-a3bd-2d9c254e9a3d.mp3')">Adeseori cărarea mea</button>
@@ -238,6 +421,7 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415192854-e82ffe8c-ff7e-40c4-a95a-76933563943d.mp3')">Brațe tari</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415225766-28c29e6b-e80d-44c7-895d-1d29a5c6de4c.mp3')">Când adesori pe cale</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415265543-2bf721c1-b23e-4faa-af20-80f0a4ca026b.mp3')">Când în grabă</button>
+    <button class="button" onclick="playSong(this, 'https://www.image2url.com/r2/default/audio/1784282834619-607382a0-d121-4586-872c-7d65fc0b82c2.mp3')">Când ăn poarta veșniciei</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415310034-d742231f-1204-41cb-a901-0689be902568.mp3')">Cântarea mea</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415339891-b8780a2a-1cea-4239-a650-b0f1eb0a3c5b.mp3')">Cât ai trăit...</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415366200-01b54983-696a-4a9a-87e6-a192a5f800d1.mp3')">Ce cânt frumos</button>
@@ -250,7 +434,7 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415645779-199cbb68-89ce-44e5-8d68-19d7a73aec8f.mp3')">Ce-ar fi făptura fără tine</button>
     <button class="button" onclick="playSong(this, 'https://cdn.imageurlgenerator.com/uploads/4c7b588f-9046-483d-81fd-9d3a85e48b4e.mp3')">Cu ce te-ntâmpin</button>
     <button class="button" onclick="playSong(this, 'https://cdn.imageurlgenerator.com/uploads/7981c075-61ab-4d68-8eb0-40fe773dee11.mp3')">Cu Isus noi pornim</button>
-    <button class="button" onclick="playSong(this, 'https://cdn.imageurlgenerator.com/uploads/a76c59c2-02d7-49c1-875b-118fecf7fde2.mp3')">Cu ochii mei să pot Isuse</button>
+    <button class="button" onclick="playSong(this, 'https://cdn.imageurlgenerator.com/uploads/a76c59c2-02d7-49c1-875b-118fecf7fde2.mp3')">Cu ochii mei să văd Isuse</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413503982-42aabdd9-460e-4b7a-a113-eee8db11e15c.mp3')">Cum dorește un cerb</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415707670-04ed4372-20c0-482c-8b33-bd4f17bbcebe.mp3')">Cum nu mai lasă</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771415725622-a4736552-3aa9-402d-a300-b816789f2dc4.mp3')">Cum să nu te cânt</button>
@@ -276,6 +460,7 @@
     <button class="button" onclick="playSong(this, 'https://www.image2url.com/r2/default/audio/1784280653369-f1c0aadf-5a78-42c5-81f3-b18c24396714.mp3')">Domnul păcii</button>
     <button class="button" onclick="playSong(this, 'https://www.image2url.com/r2/default/audio/1784282608627-477df2c2-87c6-4e29-97c5-e221bc92d87e.mp3')">Dragoste divină</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416288982-c5d1e258-6d08-424d-9809-60502256d2af.mp3')">Drumul mântuirii</button>
+    <button class="button" onclick="playSong(this, 'https://cdn.imageurlgenerator.com/uploads/7738d774-7b03-4fab-98ee-b95e90f14500.mp3')">Drumul suferinței</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416310316-d72ed4bf-3485-4e0c-97bc-a6b413bce6c4.mp3')">După orice izbăvire - Fane</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416368031-0686e64e-5c58-44bf-b253-994a1c3dd863.mp3')">După orice izbăvire - Costin</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771416392965-6493777b-f7e6-48c2-a5e5-d4a002c67ff3.mp3')">E harul Tău</button>
@@ -305,8 +490,7 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417248850-6b35338a-5920-426d-ae78-4c7faac0a2ee.mp3')">Iubirea Ta</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417265635-fa785117-f2c2-4b4b-b00c-0eae36ab9343.mp3')">La cruce</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417300837-421cedf7-1116-48f7-9ca1-00b3381b89b0.mp3')">La însângerata-ți cruce</button>
-    <button class="button" onclick="playSong(this, 'https://www.image2url.com/r2/default/audio/1784282834619-607382a0-d121-4586-872c-7d65fc0b82c2.mp3')">Lângă poarta veșniciei</button>
-	<button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417317572-109aec64-28d5-4e4a-95a6-04b95c4283b0.mp3')">Mai avem puțin</button>
+    <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417317572-109aec64-28d5-4e4a-95a6-04b95c4283b0.mp3')">Mai avem puțin</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417335991-6140a79f-e7f9-4752-96c1-e7beb3375267.mp3')">Mai taci și de-astă dată</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417359008-8fa1821f-5b7f-40c3-ae0b-ee4bb2629f32.mp3')">Mă-ncred în El</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417379046-a275b12c-09f1-49f8-bd98-003a15fdd030.mp3')">Mielușel divin</button>
@@ -321,7 +505,6 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417642342-bf3a5eec-bdd8-466b-a5ab-8e3dd597dc35.mp3')">Nu vreau să merg</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417679386-e6648947-04c6-4c10-acac-cb3df76266eb.mp3')">Numai o lună</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417694586-cef5777d-4927-49be-9c22-ab5d6282073d.mp3')">Numai tu Isuse Doamne</button>
-	<button class="button" onclick="playSong(this, 'https://cdn.imageurlgenerator.com/uploads/54d87446-0e82-40e8-8c9d-dd35f29fae49.mp3')">Nu te rog acum</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417715140-7fbbe6c7-365a-4510-bd55-484701468dc4.mp3')">O ce bine...</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417728347-5995570e-a535-4ca6-84a3-b79bf9c60dbf.mp3')">O crește-mi iubirea</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771417748056-ffe9cfd1-6bbd-4fe8-997f-50f2610b38cc.mp3')">O Doamne mare</button>
@@ -346,7 +529,6 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418140952-d681763e-bd47-4bfa-b938-dced3b144386.mp3')">Privesc spre crucea Ta</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418158374-258c3e8a-9cc6-4e07-a651-1673a3b0238e.mp3')">Psalmistul</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418187269-b666b890-283e-4f68-ac7a-370066003dd8.mp3')">Rămâi cu noi</button>
-	<button class="button" onclick="playSong(this, 'https://cdn.imageurlgenerator.com/uploads/7738d774-7b03-4fab-98ee-b95e90f14500.mp3')">Râul suferinței</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418295604-27d88894-172a-454e-a265-93edb517b639.mp3')">Regele vieții</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418317073-82619abe-c1a9-41c5-854a-b04d91123f20.mp3')">Rugăciune</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418335731-a7ad6c29-6331-4584-a3b1-5b6e686b9a71.mp3')">Să ard de sete</button>
@@ -355,6 +537,7 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418404815-63716493-0f88-4408-a518-60b1a6b1d886.mp3')">Să fiu cuprins</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418426749-0dcfa443-b460-4a77-b8dc-a6fd7faf2a69.mp3')">Să nu m-abat</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418441164-46915c14-0986-4fd4-a862-05e8ba4ee767.mp3')">Să nu merg</button>
+    <button class="button" onclick="playSong(this, 'https://cdn.imageurlgenerator.com/uploads/54d87446-0e82-40e8-8c9d-dd35f29fae49.mp3')">Să nu pierd nimic</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418466094-a01ba0d1-c089-4762-9330-256a1fae9d07.mp3')">Să nu pot</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418478762-b8917061-ded5-46b7-a36b-0658362bb723.mp3')">Să nu slăbești</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771418496325-4ca3fded-4292-46bd-b1e4-b58447332e8d.mp3')">Să-mi sporesc</button>
@@ -391,9 +574,7 @@
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771423391574-e82d804c-25fd-47db-8265-3fe90f442efb.mp3')">Zi de zi</button>
     <div id="player-container">
         <div class="player-controls">
-	    <button class="nav-btn" onclick="joacaPrecedenta()">⏮</button>
             <button id="play-pause-btn" onclick="toggleAudio()">▶</button>
-	    <button class="nav-btn" onclick="joacaUrmatoarea()">⏭</button>
 	    <button id="loop-btn" onclick="toggleLoop()" style="background: none; border: none; cursor: pointer; font-size: 1.2rem;">🔁</button>
             <div class="progress-container" onclick="seek(event)">
                 <div id="progress-bar"></div>
@@ -401,7 +582,19 @@
             <span id="time-remaining">0:00</span>
         </div>
     </div>
-    <audio id="myAudio"></audio>
+    <div id="mini-player">
+        <span id="mini-player-title" class="mini-player-title"></span>
+        <div class="mini-player-controls">
+            <button type="button" id="mini-prev" onclick="joacaPrecedenta()" aria-label="Cântarea anterioară">⏮</button>
+            <button type="button" id="mini-play-pause" onclick="toggleAudio()" aria-label="Redare/Pauză">▶</button>
+            <button type="button" id="mini-next" onclick="joacaUrmatoarea()" aria-label="Cântarea următoare">⏭</button>
+            <button type="button" id="mini-loop" onclick="toggleLoop()" aria-label="Repetă">🔁</button>
+        </div>
+        <div class="mini-progress-container" onclick="seek(event)">
+            <div id="mini-progress-bar"></div>
+        </div>
+    </div>
+    <audio id="myAudio" playsinline preload="metadata"></audio>
     <script>
         const audio = document.getElementById('myAudio');
         const playerContainer = document.getElementById('player-container');
@@ -410,30 +603,188 @@
         const timeRemaining = document.getElementById('time-remaining');
         const backToTopBtn = document.getElementById('back-to-top');
 	const loopBtn = document.getElementById('loop-btn');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+        const miniPlayer = document.getElementById('mini-player');
+        const miniPlayerTitle = document.getElementById('mini-player-title');
+        const miniPlayPauseBtn = document.getElementById('mini-play-pause');
+        const miniProgressBar = document.getElementById('mini-progress-bar');
+        const miniLoopBtn = document.getElementById('mini-loop');
+        const artworkUrl = 'https://t4.ftcdn.net/jpg/02/87/29/51/360_F_287295152_TWOf8EotxI1j8frrB1B4JsUTCZ4rwEkF.jpg';
+
+        function isMobile()
+        {
+            return window.matchMedia('(max-width: 768px)').matches;
+        }
+
+        function setPlayPauseState(isPlaying)
+        {
+            const icon = isPlaying ? '⏸' : '▶';
+            playPauseBtn.innerHTML = icon;
+            miniPlayPauseBtn.innerHTML = icon;
+        }
+
+        function setLoopState(isActive)
+        {
+            if (isActive)
+            {
+                loopBtn.style.color = '#4CAF50';
+                loopBtn.style.transform = 'scale(1.2)';
+                loopBtn.title = 'Loop activat';
+                miniLoopBtn.classList.add('active');
+                miniLoopBtn.title = 'Loop activat';
+            }
+            else
+            {
+                loopBtn.style.color = 'initial';
+                loopBtn.style.transform = 'scale(1)';
+                loopBtn.title = 'Loop dezactivat';
+                miniLoopBtn.classList.remove('active');
+                miniLoopBtn.title = 'Loop dezactivat';
+            }
+        }
+
+        function showMiniPlayer(title)
+        {
+            if (!isMobile())
+                return;
+            miniPlayerTitle.textContent = title;
+            miniPlayer.classList.add('visible');
+            document.body.classList.add('mini-player-active');
+        }
+
+        function hideMiniPlayer()
+        {
+            miniPlayer.classList.remove('visible');
+            document.body.classList.remove('mini-player-active');
+        }
+
+        function getSongUrl(button)
+        {
+            const match = button.getAttribute('onclick').match(/playSong\(this,\s*'([^']+)'\)/);
+            return match ? match[1] : null;
+        }
+
+        function startSong(butonulApasat, url)
+        {
+            audio.loop = false;
+            setLoopState(false);
+            butonulApasat.after(playerContainer);
+            playerContainer.style.display = 'block';
+            butonCurent = butonulApasat;
+
+            if (audio.getAttribute('src') !== url)
+            {
+                audio.src = url;
+                progressBar.style.width = '0%';
+                miniProgressBar.style.width = '0%';
+                timeRemaining.innerHTML = '0:00';
+            }
+
+            const titlu = butonulApasat.textContent.trim();
+            updateMediaSession(titlu);
+            showMiniPlayer(titlu);
+
+            audio.play().then(() => {
+                setPlayPauseState(true);
+            }).catch((e) => {
+                console.log('Așteaptă...', e);
+                setPlayPauseState(false);
+            });
+        }
+
+        function initMediaSession()
+        {
+            if (!('mediaSession' in navigator))
+                return;
+            navigator.mediaSession.setActionHandler('play', () => {
+                audio.play().then(() => setPlayPauseState(true)).catch(e => console.log(e));
+            });
+            navigator.mediaSession.setActionHandler('pause', () => {
+                audio.pause();
+                setPlayPauseState(false);
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', () => joacaPrecedenta());
+            navigator.mediaSession.setActionHandler('nexttrack', () => joacaUrmatoarea());
+        }
+
+        initMediaSession();
+
+        function normalizeRomanian(text)
+        {
+            return text
+                .toLowerCase()
+                .replace(/ă|â/g, 'a')
+                .replace(/î/g, 'i')
+                .replace(/ș|ş/g, 's')
+                .replace(/ț|ţ/g, 't');
+        }
+
+        function filterSongs(query)
+        {
+            const normalizedQuery = normalizeRomanian(query.trim());
+            if (!normalizedQuery)
+                return [];
+            return Array.from(document.querySelectorAll('.button')).filter(btn =>
+                normalizeRomanian(btn.textContent.trim()).startsWith(normalizedQuery)
+            );
+        }
+
+        function renderSearchResults(matches)
+        {
+            searchResults.innerHTML = '';
+            if (matches.length === 0)
+            {
+                searchResults.classList.remove('visible');
+                return;
+            }
+            matches.forEach(btn =>
+            {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.textContent = btn.textContent.trim();
+                item.addEventListener('click', () => selectSongFromSearch(btn));
+                searchResults.appendChild(item);
+            });
+            searchResults.classList.add('visible');
+        }
+
+        function selectSongFromSearch(button)
+        {
+            searchInput.value = '';
+            searchResults.classList.remove('visible');
+            searchResults.innerHTML = '';
+            button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => button.click(), 300);
+        }
+
+        searchInput.addEventListener('input', () =>
+        {
+            renderSearchResults(filterSongs(searchInput.value));
+        });
+
+        searchInput.addEventListener('focus', () =>
+        {
+            if (searchInput.value.trim())
+                renderSearchResults(filterSongs(searchInput.value));
+        });
+
+        document.addEventListener('click', (e) =>
+        {
+            if (!e.target.closest('#search-wrapper'))
+                searchResults.classList.remove('visible');
+        });
 
 	function toggleLoop()
 	{
 	    audio.loop = !audio.loop;
-	    if (audio.loop)
-	    {
-			loopBtn.style.color = "#4CAF50";
-			loopBtn.style.transform = "scale(1.2)";
-			loopBtn.title = "Loop activat";
-	    }
-	    else
-	    {
-			loopBtn.style.color = "initial";
-			loopBtn.style.transform = "scale(1)";
-			loopBtn.title = "Loop dezactivat";
-	    }
+	    setLoopState(audio.loop);
 	}
 
     let butonCurent = null; 
 
     function playSong(butonulApasat, url) 
 	{
-	    audio.loop = false;
-	    loopBtn.style.color = "initial";
         const esteVizibil = playerContainer.style.display === "block";
         const esteSubAcestButon = playerContainer.previousElementSibling === butonulApasat;
 
@@ -441,28 +792,13 @@
 		{
                 playerContainer.style.display = "none";
                 audio.pause();
-                playPauseBtn.innerHTML = "▶";
+                setPlayPauseState(false);
                 butonCurent = null;
+                hideMiniPlayer();
         } 
 		else 
 		{
-            butonulApasat.after(playerContainer);
-            playerContainer.style.display = "block";
-            butonCurent = butonulApasat; 
-
-            if (audio.getAttribute('src') !== url) 
-			{
-                audio.src = url;
-                progressBar.style.width = "0%";
-                timeRemaining.innerHTML = "0:00";
-            }
-                
-            audio.play().then(() => {
-                playPauseBtn.innerHTML = "⏸";
-            }).catch((e) => {
-                console.log("Așteaptă...", e);
-                playPauseBtn.innerHTML = "▶";
-            });
+            startSong(butonulApasat, url);
         }
     }
 	
@@ -484,15 +820,15 @@
 	
 	function toggleAudio() 
 	{
-            if (playPauseBtn.innerHTML === "⏸") 
+            if (!audio.paused) 
 		{
             audio.pause();
-            playPauseBtn.innerHTML = "▶";
+            setPlayPauseState(false);
         	} 
 	    else 
 		{
             audio.play().then(() => {
-                playPauseBtn.innerHTML = "⏸";
+                setPlayPauseState(true);
             }).catch(e => console.log(e));
         }
     }
@@ -502,6 +838,7 @@
 	{
             const percent = (audio.currentTime / audio.duration) * 100;
             progressBar.style.width = percent + "%";
+            miniProgressBar.style.width = percent + "%";
             let remaining = audio.duration - audio.currentTime;
             if (remaining < 0) 
 				remaining = 0;
@@ -522,10 +859,12 @@
     audio.addEventListener('play', () => {
 	if ('mediaSession' in navigator)
 	    navigator.mediaSession.playbackState = "playing";
+        setPlayPauseState(true);
     });
     audio.addEventListener('pause', () => {
         if ('mediaSession' in navigator) 
 	    navigator.mediaSession.playbackState = "paused";
+        setPlayPauseState(false);
     });
     function seek(event) 
 	{
@@ -545,15 +884,22 @@
 	if (indexCurent !== -1 && indexCurent < toateButoanele.length - 1) 
 	{
             const urmatorulButon = toateButoanele[indexCurent + 1];
-            urmatorulButon.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-                urmatorulButon.click();
-            }, 300);
+            const url = getSongUrl(urmatorulButon);
+            if (document.hidden || !isMobile())
+            {
+                startSong(urmatorulButon, url);
+            }
+            else
+            {
+                urmatorulButon.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => startSong(urmatorulButon, url), 300);
+            }
         }
 	else 
 	{
-            playPauseBtn.innerHTML = "▶";
+            setPlayPauseState(false);
             progressBar.style.width = "0%";
+            miniProgressBar.style.width = "0%";
         }
     }
 
@@ -566,10 +912,16 @@
         if (indexCurent !== -1 && indexCurent > 0) 
 	{
             const butonulPrecedent = toateButoanele[indexCurent - 1];
-            butonulPrecedent.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => {
-                butonulPrecedent.click();
-            }, 300);
+            const url = getSongUrl(butonulPrecedent);
+            if (document.hidden || !isMobile())
+            {
+                startSong(butonulPrecedent, url);
+            }
+            else
+            {
+                butonulPrecedent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => startSong(butonulPrecedent, url), 300);
+            }
         }
     }
 
@@ -584,14 +936,14 @@
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: titlu,
                 artist: 'Lista de cântări',
+                album: 'Playlist',
                 artwork: [
-                    { src: 'https://t4.ftcdn.net/jpg/02/87/29/51/360_F_287295152_TWOf8EotxI1j8frrB1B4JsUTCZ4rwEkF.jpg', sizes: '512x512', type: 'image/jpeg' }
+                    { src: artworkUrl, sizes: '96x96', type: 'image/jpeg' },
+                    { src: artworkUrl, sizes: '128x128', type: 'image/jpeg' },
+                    { src: artworkUrl, sizes: '256x256', type: 'image/jpeg' },
+                    { src: artworkUrl, sizes: '512x512', type: 'image/jpeg' }
                 ]
             });
-            navigator.mediaSession.setActionHandler('play', () => { toggleAudio(); });
-            navigator.mediaSession.setActionHandler('pause', () => { toggleAudio(); });
-            navigator.mediaSession.setActionHandler('previoustrack', () => { joacaPrecedenta(); });
-            navigator.mediaSession.setActionHandler('nexttrack', () => { joacaUrmatoarea(); });
         }
     }	
 	
