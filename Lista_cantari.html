@@ -171,10 +171,10 @@
 	    text-align: right;
 	}
 	
-	#back-to-top
+	#back-to-top,
+	#back-to-bottom
 	{
 	    position: fixed;
-    	    bottom: 30px;
     	    right: 30px;
     	    width: 50px;
     	    height: 50px;
@@ -191,7 +191,39 @@
     	    transition: transform 0.2s, background-color 0.2s;
 	    animation: fade_in 0.5s ease-out forwards;
 	}
-	#back-to-top:hover
+	#back-to-top
+	{
+    	    bottom: 90px;
+	}
+	#back-to-bottom
+	{
+    	    bottom: 30px;
+	}
+	#back-to-top:hover,
+	#back-to-bottom:hover
+	{
+	    background-color: #3B3B3B;
+    	    transform: scale(1.1);
+	}
+	#bg-picker-btn
+	{
+	    position: fixed;
+	    left: 30px;
+	    bottom: 30px;
+	    width: 50px;
+	    height: 50px;
+	    background-color: #000;
+	    color: white;
+	    border: none;
+	    border-radius: 50%;
+	    font-size: 22px;
+	    cursor: pointer;
+	    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+	    z-index: 1000;
+	    transition: transform 0.2s, background-color 0.2s;
+	    animation: fade_in 0.5s ease-out forwards;
+	}
+	#bg-picker-btn:hover
 	{
 	    background-color: #3B3B3B;
     	    transform: scale(1.1);
@@ -388,6 +420,14 @@
 	    }
 	    body.mini-player-active #back-to-top
 	    {
+	        bottom: calc(160px + env(safe-area-inset-bottom));
+	    }
+	    body.mini-player-active #back-to-bottom
+	    {
+	        bottom: calc(100px + env(safe-area-inset-bottom));
+	    }
+	    body.mini-player-active #bg-picker-btn
+	    {
 	        bottom: calc(100px + env(safe-area-inset-bottom));
 	    }
 	}
@@ -408,6 +448,9 @@
         </div>
     </div>
     <button id="back-to-top" onclick="scrollToTop()">↑</button>
+    <button id="back-to-bottom" onclick="scrollToBottom()">↓</button>
+    <button id="bg-picker-btn" title="Schimbă fundalul (ține apăsat sau click-dreapta ca să revii la cel implicit)" aria-label="Schimbă fundalul">🖼️</button>
+    <input type="file" id="bg-file-input" accept="image/*" style="display:none">
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771409946092-0d01a103-d882-4b57-99fb-dee0d810ece3.mp3')">Acel ce pururi</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771410026151-5feda810-d871-4ede-a3bd-2d9c254e9a3d.mp3')">Adeseori cărarea mea</button>
     <button class="button" onclick="playSong(this, 'https://image2url.com/r2/default/audio/1771413139110-a3b2d65f-b8ed-48d9-9469-438722546b31.mp3')">Ajută-mi să nu pot</button>
@@ -602,6 +645,7 @@
         const progressBar = document.getElementById('progress-bar');
         const timeRemaining = document.getElementById('time-remaining');
         const backToTopBtn = document.getElementById('back-to-top');
+        const backToBottomBtn = document.getElementById('back-to-bottom');
 	const loopBtn = document.getElementById('loop-btn');
         const searchInput = document.getElementById('search-input');
         const searchResults = document.getElementById('search-results');
@@ -616,6 +660,154 @@
         {
             return window.matchMedia('(max-width: 768px)').matches;
         }
+
+        const BG_DB_NAME = 'listaCantariSetari';
+        const BG_STORE_NAME = 'fundal';
+        const BG_KEY = 'fundalAles';
+        let bgObjectUrl = null;
+
+        function openBgDb()
+        {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(BG_DB_NAME, 1);
+                request.onupgradeneeded = () => {
+                    request.result.createObjectStore(BG_STORE_NAME);
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function saveBgImage(blob)
+        {
+            const db = await openBgDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(BG_STORE_NAME, 'readwrite');
+                tx.objectStore(BG_STORE_NAME).put(blob, BG_KEY);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function loadBgImage()
+        {
+            const db = await openBgDb();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(BG_STORE_NAME, 'readonly');
+                const req = tx.objectStore(BG_STORE_NAME).get(BG_KEY);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        function applyBgImage(blob)
+        {
+            const bgDiv = document.querySelector('.bg-image');
+            if (bgObjectUrl)
+                URL.revokeObjectURL(bgObjectUrl);
+            bgObjectUrl = URL.createObjectURL(blob);
+            bgDiv.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("${bgObjectUrl}")`;
+        }
+
+        async function initCustomBackground()
+        {
+            try
+            {
+                const blob = await loadBgImage();
+                if (blob)
+                    applyBgImage(blob);
+            }
+            catch (e)
+            {
+                console.log('Nu s-a putut încărca fundalul salvat', e);
+            }
+        }
+
+        initCustomBackground();
+
+        async function resetBgToDefault()
+        {
+            if (!confirm('Revii la fundalul implicit?'))
+                return;
+            try
+            {
+                const db = await openBgDb();
+                await new Promise((resolve, reject) => {
+                    const tx = db.transaction(BG_STORE_NAME, 'readwrite');
+                    tx.objectStore(BG_STORE_NAME).delete(BG_KEY);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                });
+            }
+            catch (e)
+            {
+                console.log('Nu s-a putut șterge fundalul salvat', e);
+            }
+            if (bgObjectUrl)
+            {
+                URL.revokeObjectURL(bgObjectUrl);
+                bgObjectUrl = null;
+            }
+            document.querySelector('.bg-image').style.backgroundImage = '';
+        }
+
+        const bgPickerBtn = document.getElementById('bg-picker-btn');
+        let bgPressTimer = null;
+        let bgLongPressTriggered = false;
+
+        function startBgPressTimer()
+        {
+            bgPressTimer = setTimeout(() => {
+                bgPressTimer = null;
+                bgLongPressTriggered = true;
+                resetBgToDefault();
+            }, 600);
+        }
+
+        function cancelBgPressTimer()
+        {
+            if (bgPressTimer)
+            {
+                clearTimeout(bgPressTimer);
+                bgPressTimer = null;
+            }
+        }
+
+        bgPickerBtn.addEventListener('pointerdown', startBgPressTimer);
+        bgPickerBtn.addEventListener('pointerup', cancelBgPressTimer);
+        bgPickerBtn.addEventListener('pointerleave', cancelBgPressTimer);
+        bgPickerBtn.addEventListener('pointercancel', cancelBgPressTimer);
+
+        bgPickerBtn.addEventListener('click', () => {
+            if (bgLongPressTriggered)
+            {
+                bgLongPressTriggered = false;
+                return;
+            }
+            bgFileInput.click();
+        });
+
+        bgPickerBtn.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            resetBgToDefault();
+        });
+
+        const bgFileInput = document.getElementById('bg-file-input');
+        bgFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file)
+                return;
+            applyBgImage(file);
+            try
+            {
+                await saveBgImage(file);
+            }
+            catch (err)
+            {
+                console.log('Nu s-a putut salva fundalul ales', err);
+            }
+            bgFileInput.value = '';
+        });
 
         function setPlayPauseState(isPlaying)
         {
@@ -947,24 +1139,30 @@
         }
     }	
 	
-    window.onscroll = function() 
-	{
-        if (backToTopBtn) 
-		{
-            if (document.documentElement.scrollTop > 300 || document.body.scrollTop > 300) 
-			{
-                backToTopBtn.style.display = "block";
-            } 
-			else 
-			{
-                backToTopBtn.style.display = "none";
-            }
-        }
-    };
+    function updateScrollButtons()
+    {
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight;
+        const clientHeight = document.documentElement.clientHeight;
+        const nearBottom = scrollTop + clientHeight >= scrollHeight - 300;
+
+        if (backToTopBtn)
+            backToTopBtn.style.display = scrollTop > 300 ? "block" : "none";
+        if (backToBottomBtn)
+            backToBottomBtn.style.display = nearBottom ? "none" : "block";
+    }
+
+    window.onscroll = updateScrollButtons;
+    updateScrollButtons();
 
     function scrollToTop() 
 	{ 
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    }
+
+    function scrollToBottom()
+    {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
     }
     </script>
 </body>
