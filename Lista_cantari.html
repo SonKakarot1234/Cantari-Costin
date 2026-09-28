@@ -11,11 +11,11 @@
 	body, html
 	{
 	    min-height: 100%;
-        margin: 0;
+            margin: 0;
 	    padding: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	    color: white;
-        display: flex;
+            display: flex;
 	    flex-direction: column;
 	    align-items: center;
 	    justify-content: flex-start;
@@ -254,8 +254,8 @@
 	#brightness-panel
 	{
 	    position: fixed;
-	    left: 30px;
-	    bottom: 160px;
+	    left: 90px;
+	    bottom: 98px;
 	    display: flex;
 	    align-items: center;
 	    gap: 12px;
@@ -270,7 +270,7 @@
 	    transform: translateY(10px) scale(0.95);
 	    pointer-events: none;
 	    transition: opacity 0.25s ease, transform 0.25s ease;
-	    transform-origin: bottom left;
+	    transform-origin: left center;
 	}
 	#brightness-panel.visible
 	{
@@ -327,6 +327,123 @@
 	    font-weight: 600;
 	    color: white;
 	    text-align: right;
+	}
+	#audio-btn
+	{
+	    position: fixed;
+	    left: 30px;
+	    bottom: 160px;
+	    width: 50px;
+	    height: 50px;
+	    background-color: #000;
+	    color: white;
+	    border: none;
+	    border-radius: 50%;
+	    font-size: 22px;
+	    cursor: pointer;
+	    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+	    z-index: 1000;
+	    transition: transform 0.2s, background-color 0.2s;
+	    animation: fade_in 0.5s ease-out forwards;
+	}
+	#audio-btn:hover
+	{
+	    background-color: #3B3B3B;
+    	    transform: scale(1.1);
+	}
+	#audio-panel
+	{
+	    position: fixed;
+	    left: 90px;
+	    bottom: 163px;
+	    display: flex;
+	    align-items: center;
+	    gap: 12px;
+	    background-color: rgba(0, 0, 0, 0.8);
+	    backdrop-filter: blur(6px);
+	    -webkit-backdrop-filter: blur(6px);
+	    padding: 14px 18px;
+	    border-radius: 30px;
+	    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+	    z-index: 1000;
+	    opacity: 0;
+	    transform: translateY(10px) scale(0.95);
+	    pointer-events: none;
+	    transition: opacity 0.25s ease, transform 0.25s ease;
+	    transform-origin: left center;
+	}
+	#audio-panel.visible
+	{
+	    opacity: 1;
+	    transform: translateY(0) scale(1);
+	    pointer-events: auto;
+	}
+	#audio-slider
+	{
+	    -webkit-appearance: none;
+	    appearance: none;
+	    width: 140px;
+	    height: 4px;
+	    border-radius: 2px;
+	    background: rgba(255, 255, 255, 0.3);
+	    outline: none;
+	    cursor: pointer;
+	}
+	#audio-slider::-webkit-slider-thumb
+	{
+	    -webkit-appearance: none;
+	    appearance: none;
+	    width: 18px;
+	    height: 18px;
+	    border-radius: 50%;
+	    background-color: white;
+	    cursor: pointer;
+	    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+	    transition: transform 0.15s ease;
+	}
+	#audio-slider::-webkit-slider-thumb:hover
+	{
+	    transform: scale(1.15);
+	}
+	#audio-slider::-moz-range-thumb
+	{
+	    width: 18px;
+	    height: 18px;
+	    border: none;
+	    border-radius: 50%;
+	    background-color: white;
+	    cursor: pointer;
+	    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+	    transition: transform 0.15s ease;
+	}
+	#audio-slider::-moz-range-thumb:hover
+	{
+	    transform: scale(1.15);
+	}
+	#audio-value
+	{
+	    min-width: 42px;
+	    font-size: 14px;
+	    font-weight: 600;
+	    color: white;
+	    text-align: right;
+	}
+	#audio-panel.no-volume
+	{
+	    max-width: 220px;
+	    border-radius: 18px;
+	}
+	#audio-panel.no-volume #audio-slider
+	{
+	    display: none;
+	}
+	#audio-panel.no-volume #audio-value
+	{
+	    min-width: 0;
+	    font-size: 13px;
+	    font-weight: 400;
+	    line-height: 1.3;
+	    text-align: left;
 	}
 	#top-controls
 	{
@@ -536,7 +653,15 @@
 	    }
 	    body.mini-player-active #brightness-panel
 	    {
+	        bottom: calc(168px + env(safe-area-inset-bottom));
+	    }
+	    body.mini-player-active #audio-btn
+	    {
 	        bottom: calc(230px + env(safe-area-inset-bottom));
+	    }
+	    body.mini-player-active #audio-panel
+	    {
+	        bottom: calc(233px + env(safe-area-inset-bottom));
 	    }
 	}
 	@keyframes fadeInButton 
@@ -561,6 +686,11 @@
     <div id="brightness-panel">
         <input type="range" id="brightness-slider" min="0" max="100" step="1" value="50">
         <span id="brightness-value">50%</span>
+    </div>
+    <button id="audio-btn" title="Modificare volum" aria-label="Modificare volum">🔊</button>
+    <div id="audio-panel">
+        <input type="range" id="audio-slider" min="0" max="100" step="1" value="50">
+        <span id="audio-value">50%</span>
     </div>
     <button id="bg-picker-btn" title="Schimbă fundalul (ține apăsat sau click-dreapta ca să revii la cel implicit)" aria-label="Schimbă fundalul">🖼️</button>
     <input type="file" id="bg-file-input" accept="image/*" style="display:none">
@@ -963,6 +1093,78 @@
         document.addEventListener('click', (e) => {
             if (!brightnessPanel.contains(e.target) && e.target !== brightnessBtn)
                 brightnessPanel.classList.remove('visible');
+        });
+
+        const VOLUME_STORAGE_KEY = 'listaCantariVolum';
+        const audioBtn = document.getElementById('audio-btn');
+        const audioPanel = document.getElementById('audio-panel');
+        const audioSlider = document.getElementById('audio-slider');
+        const audioValueLabel = document.getElementById('audio-value');
+
+        // iPhone/iPad ignore audio.volume (it always stays at 1), so check if it really changes
+        function volumeIsSupported()
+        {
+            const previous = audio.volume;
+            audio.volume = 0.5;
+            const supported = Math.abs(audio.volume - 0.5) < 0.01;
+            audio.volume = previous;
+            return supported;
+        }
+
+        const volumeSupported = volumeIsSupported();
+
+        function applyVolume(percent)
+        {
+            audio.volume = percent / 100;
+            audioValueLabel.textContent = `${percent}%`;
+            audioBtn.textContent = percent === 0 ? '🔇' : percent < 34 ? '🔈' : percent < 67 ? '🔉' : '🔊';
+        }
+
+        function initVolume()
+        {
+            if (!volumeSupported)
+            {
+                audioPanel.classList.add('no-volume');
+                audioValueLabel.textContent = 'Pe iPhone/iPad, volumul se reglează din butoanele dispozitivului.';
+                return;
+            }
+            let saved = NaN;
+            try
+            {
+                saved = parseInt(localStorage.getItem(VOLUME_STORAGE_KEY), 10);
+            }
+            catch (err) {}
+            if (isNaN(saved) || saved < 0 || saved > 100)
+                saved = 50;
+            audioSlider.value = saved;
+            applyVolume(saved);
+        }
+
+        initVolume();
+
+        audioSlider.addEventListener('input', (e) => {
+            const percent = parseInt(e.target.value, 10);
+            applyVolume(percent);
+            try
+            {
+                localStorage.setItem(VOLUME_STORAGE_KEY, percent);
+            }
+            catch (err) {}
+        });
+
+        audioBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            brightnessPanel.classList.remove('visible');
+            audioPanel.classList.toggle('visible');
+        });
+
+        brightnessBtn.addEventListener('click', () => {
+            audioPanel.classList.remove('visible');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!audioPanel.contains(e.target) && e.target !== audioBtn)
+                audioPanel.classList.remove('visible');
         });
 
         function setPlayPauseState(isPlaying)
